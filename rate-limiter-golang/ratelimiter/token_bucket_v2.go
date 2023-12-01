@@ -1,7 +1,6 @@
 package ratelimiter
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
@@ -11,38 +10,36 @@ type TokenBucketV2 struct {
 	bucketSize      int
 	refillRate      int
 	lastElapsedTime time.Time
-	internalFunc    func()
+	// internalFunc    func()
 }
 
-func (t *TokenBucketV2) CallInternalFunc() error {
-	fmt.Println("debug: calling internal")
+func (t *TokenBucketV2) Request() bool {
 	t.fill()
-	if t.revokeToken() == true {
-    fmt.Println("debug: revoked token successfully: ", t.tokenCount)
-		t.internalFunc()
-		return nil
-	} else {
-		fmt.Println("debug: rate limit exceeded")
-		return errors.New("Rate limit exceeded")
-	}
+	return t.revokeToken()
 }
+
+// func (t *TokenBucketV2) CallInternalFunc() error {
+// 	fmt.Println("debug: calling internal")
+// 	t.fill()
+// 	if t.revokeToken() == true {
+//     fmt.Println("debug: revoked token successfully: ", t.tokenCount)
+// 		t.internalFunc()
+// 		return nil
+// 	} else {
+// 		fmt.Println("debug: rate limit exceeded")
+// 		return errors.New("Rate limit exceeded")
+// 	}
+// }
 
 func (t *TokenBucketV2) fill() {
 	duration := time.Now().Sub(t.lastElapsedTime)
 	fillCount := t.refillRate * int(duration/time.Second)
 	t.addTokens(fillCount)
-  t.lastElapsedTime = time.Now()
+	t.lastElapsedTime = time.Now()
 }
 
 func (t *TokenBucketV2) addTokens(fillCount int) {
-	if t.tokenCount < t.bucketSize {
-		newBucketSize := t.tokenCount + fillCount
-		if newBucketSize <= t.bucketSize {
-			t.tokenCount = newBucketSize
-		} else {
-			t.tokenCount = t.bucketSize
-		}
-	}
+	t.tokenCount = min(t.bucketSize, t.tokenCount+fillCount)
 }
 
 func (t *TokenBucketV2) revokeToken() bool {
@@ -54,7 +51,7 @@ func (t *TokenBucketV2) revokeToken() bool {
 	return false
 }
 
-func CreateTokenBucketV2(bucketSize int, refillRate int, internalFunc func()) *TokenBucketV2 {
-	limiter := &TokenBucketV2{1, bucketSize, refillRate, time.Now(), internalFunc}
+func CreateTokenBucketV2(bucketSize int, refillRate int) *TokenBucketV2 {
+	limiter := &TokenBucketV2{1, bucketSize, refillRate, time.Now()}
 	return limiter
 }
