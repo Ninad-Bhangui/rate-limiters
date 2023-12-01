@@ -34,7 +34,7 @@ func main() {
 	mux := http.NewServeMux()
 	finalHandler := http.HandlerFunc(simpleApi)
 
-	limiter := ratelimiter.CreateTokenBucketV2(3, 1)
+	limiter := ratelimiter.CreateTokenBucketV2(10, 1)
 	mux.Handle("/", rateLimiterMiddleWare(limiter, finalHandler))
 
 	err := http.ListenAndServe(":3000", mux)

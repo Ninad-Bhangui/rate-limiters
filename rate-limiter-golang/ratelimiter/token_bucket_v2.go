@@ -8,7 +8,7 @@ import (
 type TokenBucketV2 struct {
 	tokenCount      int
 	bucketSize      int
-	refillRate      int
+	refillRate      float32 
 	lastElapsedTime time.Time
 	// internalFunc    func()
 }
@@ -33,8 +33,8 @@ func (t *TokenBucketV2) Request() bool {
 
 func (t *TokenBucketV2) fill() {
 	duration := time.Now().Sub(t.lastElapsedTime)
-	fillCount := t.refillRate * int(duration/time.Second)
-	t.addTokens(fillCount)
+	fillCount := t.refillRate * float32(duration/time.Second)
+	t.addTokens(int(fillCount))
 	t.lastElapsedTime = time.Now()
 }
 
@@ -51,7 +51,7 @@ func (t *TokenBucketV2) revokeToken() bool {
 	return false
 }
 
-func CreateTokenBucketV2(bucketSize int, refillRate int) *TokenBucketV2 {
-	limiter := &TokenBucketV2{1, bucketSize, refillRate, time.Now()}
+func CreateTokenBucketV2(bucketSize int, refillRate float32) *TokenBucketV2 {
+	limiter := &TokenBucketV2{10, bucketSize, refillRate, time.Now()}
 	return limiter
 }
