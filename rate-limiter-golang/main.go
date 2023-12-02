@@ -7,7 +7,7 @@ import (
 	"rate-limiter-golang/ratelimiter"
 )
 
-func rateLimiterMiddleWare(limiter *ratelimiter.TokenBucketV2, next http.Handler) http.Handler {
+func rateLimiterMiddleWare(limiter ratelimiter.RateLimiter, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if limiter.Request() {
 			next.ServeHTTP(w, r)
@@ -23,14 +23,6 @@ func simpleApi(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// limiter := ratelimiter.CreateTokenBucketV2(3, 1, func() { fmt.Println("internal function invoked") })
-	// limiter.CallInternalFunc()
-	// limiter.CallInternalFunc()
-	//  fmt.Println("debug: Sleeping...")
-	//  time.Sleep(2*time.Second)
-	// limiter.CallInternalFunc()
-	// limiter.CallInternalFunc()
-	// limiter.CallInternalFunc()
 	mux := http.NewServeMux()
 	finalHandler := http.HandlerFunc(simpleApi)
 

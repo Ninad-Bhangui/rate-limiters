@@ -1,16 +1,14 @@
 package ratelimiter
 
 import (
-	"fmt"
 	"time"
 )
 
 type TokenBucketV2 struct {
 	tokenCount      int
 	bucketSize      int
-	refillRate      float32 
+	refillRate      int 
 	lastElapsedTime time.Time
-	// internalFunc    func()
 }
 
 func (t *TokenBucketV2) Request() bool {
@@ -18,22 +16,9 @@ func (t *TokenBucketV2) Request() bool {
 	return t.revokeToken()
 }
 
-// func (t *TokenBucketV2) CallInternalFunc() error {
-// 	fmt.Println("debug: calling internal")
-// 	t.fill()
-// 	if t.revokeToken() == true {
-//     fmt.Println("debug: revoked token successfully: ", t.tokenCount)
-// 		t.internalFunc()
-// 		return nil
-// 	} else {
-// 		fmt.Println("debug: rate limit exceeded")
-// 		return errors.New("Rate limit exceeded")
-// 	}
-// }
-
 func (t *TokenBucketV2) fill() {
 	duration := time.Now().Sub(t.lastElapsedTime)
-	fillCount := t.refillRate * float32(duration/time.Second)
+	fillCount := t.refillRate * int(duration/time.Second)
 	t.addTokens(int(fillCount))
 	t.lastElapsedTime = time.Now()
 }
@@ -43,7 +28,7 @@ func (t *TokenBucketV2) addTokens(fillCount int) {
 }
 
 func (t *TokenBucketV2) revokeToken() bool {
-	fmt.Println("debug: current token count: ", t.tokenCount)
+	// fmt.Println("debug: current token count: ", t.tokenCount)
 	if t.tokenCount > 0 {
 		t.tokenCount -= 1
 		return true
@@ -51,7 +36,7 @@ func (t *TokenBucketV2) revokeToken() bool {
 	return false
 }
 
-func CreateTokenBucketV2(bucketSize int, refillRate float32) *TokenBucketV2 {
+func CreateTokenBucketV2(bucketSize int, refillRate int) *TokenBucketV2 {
 	limiter := &TokenBucketV2{10, bucketSize, refillRate, time.Now()}
 	return limiter
 }
