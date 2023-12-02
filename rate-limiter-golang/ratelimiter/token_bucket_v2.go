@@ -37,6 +37,6 @@ func (t *TokenBucketV2) revokeToken() bool {
 }
 
 func CreateTokenBucketV2(bucketSize int, refillRate int) *TokenBucketV2 {
-	limiter := &TokenBucketV2{10, bucketSize, refillRate, time.Now()}
+	limiter := &TokenBucketV2{bucketSize, bucketSize, refillRate, time.Now()} //Initialzing bucket full of tokens
 	return limiter
 }
